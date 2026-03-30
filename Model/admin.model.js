@@ -20,7 +20,15 @@ const adminschema = mongoose.Schema({
     avatar: {
         type: String,
         required: false
-    }
+    },
+    role: {
+        type: Number,
+        required: false,
+        default: 6, // 6 = read-write, 7 = rw-execute
+    },
+}, {
+    timestamps: true,
+    strict: true,
 })
 
 module.exports = mongoose.model('admin', adminschema);

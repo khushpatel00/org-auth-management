@@ -5,6 +5,9 @@ let server = express();
 
 
 connectDB();
+server.use(express.json());
+server.use(express.urlencoded());
+server.use(express.static('/public'));
 
 
 server.use('/', require('./Routes/index.routes'));
