@@ -10,5 +10,6 @@ routes.get('/', root.fetchAllAdmins);
 routes.get('/select', root.findSpecificAdmin);
 routes.get('/search', root.findAdmins);
 routes.get('/:_id', root.fetchAdmin);
+routes.post('/login', root.login);
 
 module.exports = routes;

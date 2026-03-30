@@ -8,6 +8,7 @@ routes.get('/health', root.health);
 routes.use('/admin', require('./admin.routes'));
 routes.use('/manager', require('./manager.routes'));
 routes.use('/employee', require('./employee.routes'));
+routes.use('/auth', require('./auth.routes'));
 
 
 module.exports = routes;

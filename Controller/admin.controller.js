@@ -1,5 +1,6 @@
 const adminModel = require('../Model/admin.model');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 exports.registerAdmin = async (req, res) => {
     try {
@@ -11,7 +12,7 @@ exports.registerAdmin = async (req, res) => {
         else {
 
             data.displayName ? '' : data.displayName = data.username;
-            data.password = await bcrypt.hash(data.password, 17);
+            data.password = await bcrypt.hash(data.password, 5);
 
             console.log(data);
 
@@ -93,6 +94,39 @@ exports.findAdmins = async (req, res) => {
         });
         console.log(response);
         return res.json(response);
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json('Internal Server Error');
+    }
+}
+
+exports.login = async (req, res) => {
+    try {
+        if (req.body?.username && req.body?.password) {
+            let admin = null;
+            if (req.body.username) admin = await adminModel.findOne({ username: req.body.username })
+            else admin = await adminModel.findOne({ email: req.body.email })
+            if (!admin) return res.status(401).json('Invalid Credential');
+
+            let isValid = await bcrypt.compare(req.body.password, admin.password)
+            console.log(isValid)
+
+            if (isValid) {
+                let token = jwt.sign({
+                    _id: admin._id,
+                    displayName: admin.displayName || admin.username,
+                    email: admin.email,
+                    role: admin.role,
+                }, process.env.JWT_SECRET, {
+                    algorithm: 'HS256',
+                    expiresIn: '12h',                    
+                })
+                return res.status(200).json(token, 'Valid for 12Hours');
+            }
+            else return res.status(401).json('Invalid Credential');
+        } else {
+            return res.status(401).json('Bad Request');
+        }
     } catch (err) {
         console.log(err);
         return res.status(500).json('Internal Server Error');
