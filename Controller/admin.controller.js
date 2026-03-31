@@ -10,13 +10,8 @@ exports.registerAdmin = async (req, res) => {
         fulfills = keys.includes('username' && 'password' && 'email');
         if (fulfills === false) return res.status(400).json('Insufficient Data')
         else {
-
-            data.displayName ? '' : data.displayName = data.username;
-            data.password = await bcrypt.hash(data.password, 5);
-
             console.log(data);
-
-            if (keys.includes('role')) {
+            if (data?.role >= 7) {
                 let SUPERADMINS = await adminModel.find({ role: 7 });
                 if (SUPERADMINS.length >= 2) return res.status(401).json('You are not authorized for this specific action')
                 else {
@@ -25,27 +20,31 @@ exports.registerAdmin = async (req, res) => {
                 }
             }
 
-            // fallback, if no role defined
-            data.role = 6;
-            let response = await adminModel.create(data);
-            delete response.password;   
-            if (!req.body.login) return res.status(201).json(response);
-            if (response._id) {
-                let token = jwt.sign({
-                    _id: response._id,
-                    displayName: response.displayName || response.username,
-                    username: response.username,
-                    email: response.email,
-                }, process.env.JWT_SECRET, {
-                    algorithm: 'HS256',
-                    expiresIn: '12h',
-                })
-                return res.status(201).json(token);
+            let existsAdmin = await adminModel.findOne({
+                $or: [
+                    { username: data.username },
+                    { email: data.email }
+                ]
+            })
+
+
+            if (existsAdmin) return res.json({
+                message: 'admin already exists',
+            })
+            else {
+                res.status(201).json('admin added successfully')
             }
 
-            // fallback
-            return res.status(201).json(response);
 
+            data.displayName ? '' : data.displayName = data.username;
+            data.password = await bcrypt.hash(data.password, 8);
+            // fallback, if no role defined
+            data.role = 6;
+            await adminModel.create(data);
+
+
+            // fallback
+            return;
         }
 
 
