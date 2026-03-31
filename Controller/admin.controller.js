@@ -24,10 +24,27 @@ exports.registerAdmin = async (req, res) => {
                     return res.status(201).json(response);
                 }
             }
-            else {
-                let response = await adminModel.create(req.body);
-                return res.status(201).json(response);
+
+            // fallback, if no role defined
+            data.role = 6;
+            let response = await adminModel.create(data);
+            delete response.password;   
+            if (!req.body.login) return res.status(201).json(response);
+            if (response._id) {
+                let token = jwt.sign({
+                    _id: response._id,
+                    displayName: response.displayName || response.username,
+                    username: response.username,
+                    email: response.email,
+                }, process.env.JWT_SECRET, {
+                    algorithm: 'HS256',
+                    expiresIn: '12h',
+                })
+                return res.status(201).json(token);
             }
+
+            // fallback
+            return res.status(201).json(response);
 
         }
 
@@ -115,13 +132,13 @@ exports.login = async (req, res) => {
                 let token = jwt.sign({
                     _id: admin._id,
                     displayName: admin.displayName || admin.username,
+                    username: admin.username,
                     email: admin.email,
-                    role: admin.role,
                 }, process.env.JWT_SECRET, {
                     algorithm: 'HS256',
-                    expiresIn: '12h',                    
+                    expiresIn: '12h',
                 })
-                return res.status(200).json(token, 'Valid for 12Hours');
+                return res.status(200).json(token);
             }
             else return res.status(401).json('Invalid Credential');
         } else {
