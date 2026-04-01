@@ -6,7 +6,7 @@ const root = require('../Controller/employee.controller')
 // EMPLOYEE ROUTES
 routes.post('/', root.registerEmployee);
 routes.get('/', root.fetchAllEmployees);
-// routes.post('/login', root.login)
+routes.post('/login', root.login)
 
 
 routes.get('/select', root.findSpecificEmployee);

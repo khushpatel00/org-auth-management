@@ -1,5 +1,7 @@
 const managerModel = require("../Model/manager.model");
 const employeeModel = require("../Model/employee.model");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 exports.registerEmployee = async (req, res) => {
     try {
@@ -105,3 +107,34 @@ exports.findEmployees = async (req, res) => {
     }
 }
 
+exports.login = async (req, res) => {
+    try {
+        if ((req?.body?.username || req?.body?.email) && req?.body?.password) {
+            let employee = null
+            if (req.body.username) employee = await employeeModel.findOne({ username: req.body.username });
+            else employee = await employeeModel.findOne({ email: req.body.email })
+            if (!employee) return res.status(401).json('Invalid Credentials');
+
+            let data = req.body;
+            let isValid = await bcrypt.compare(data.password, employee.password);
+            console.log(isValid)
+            if (isValid === true) {
+                let token = jwt.sign({
+                    _id: employee._id,
+                    username: employee.username,
+                    email: employee.email,
+                    displayName: employee.displayName,
+                }, process.env.JWT_SECRET, {
+                    algorithm: 'HS256',
+                    expiresIn: '12h',
+                })
+                return res.status(200).json(token);
+            } else return res.status(401).json('Invalid Credentials');
+
+        }
+        return res.status(401).json('Bad Request');
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json('Internal Server Error');
+    }
+}

@@ -112,7 +112,7 @@ exports.login = async (req, res) => {
 
             let data = req.body;
             let isValid = await bcrypt.compare(data.password, manager.password);
-
+            console.log(isValid)
             if (isValid === true) {
                 let token = jwt.sign({
                     _id: manager._id,
@@ -124,9 +124,10 @@ exports.login = async (req, res) => {
                     expiresIn: '12h',
                 })
                 return res.status(200).json(token);
-            }
+            } else return res.status(401).json('Invalid Credentials');
+
         }
-        else return res.status(401).json('Bad Request');
+        return res.status(401).json('Bad Request');
     } catch (error) {
         console.log(error)
         return res.status(500).json('Internal Server Error');
