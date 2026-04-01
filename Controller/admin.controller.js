@@ -2,6 +2,7 @@ const adminModel = require('../Model/admin.model');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
 exports.registerAdmin = async (req, res) => {
     try {
         let data = req.body
@@ -81,7 +82,7 @@ exports.fetchAdmin = async (req, res) => {
 
 exports.findSpecificAdmin = async (req, res) => {
     try {
-        let searchQuery = req.query.query
+        let searchQuery = req.query.query.toString();
         let response = await adminModel.findOne({
             $or: [
                 { username: { $regex: searchQuery, $options: 'i' } },
@@ -127,7 +128,7 @@ exports.login = async (req, res) => {
             let isValid = await bcrypt.compare(req.body.password, admin.password)
             console.log(isValid)
 
-            if (isValid) {
+            if (isValid === true) {
                 let token = jwt.sign({
                     _id: admin._id,
                     displayName: admin.displayName || admin.username,

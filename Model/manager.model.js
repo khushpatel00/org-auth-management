@@ -23,4 +23,4 @@ const managerschema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('admin', managerschema);
+module.exports = mongoose.model('manager', managerschema);

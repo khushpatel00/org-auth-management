@@ -5,11 +5,11 @@ const root = require('../Controller/admin.controller')
 
 
 // ADMIN ROUTES
-routes.post('/', root.registerAdmin);
-routes.get('/', root.fetchAllAdmins);
-routes.get('/select', root.findSpecificAdmin);
-routes.get('/search', root.findAdmins);
-routes.get('/:_id', root.fetchAdmin);
-routes.post('/login', root.login);
+routes.post('/', root.registerAdmin); // works
+routes.get('/', root.fetchAllAdmins); // works
+routes.get('/select', root.findSpecificAdmin); // works 
+routes.get('/search', root.findAdmins); // works
+routes.get('/:_id', root.fetchAdmin); // works
+routes.post('/login', root.login); // works 150%
 
 module.exports = routes;

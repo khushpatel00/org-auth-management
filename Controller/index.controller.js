@@ -1,4 +1,6 @@
 const adminModel = require('../Model/admin.model')
+const mongoose = require('mongoose');
+
 
 exports.status = (req, res) => {
     try {
@@ -11,8 +13,10 @@ exports.status = (req, res) => {
 
 exports.health = (req, res) => {
     try {
+        let state = mongoose.connection.readyState;
         return res.status(200).json({
             status: 'ok',
+            database: state == 1 ? 'Connected' : 'Disconnected', 
             uptime: process.uptime()
         })
     } catch (error) {

@@ -4,11 +4,13 @@ const routes = express.Router();
 const root = require('../Controller/manager.controller')
 
 // MANAGER ROUTES
-routes.post('/', root.registerManager);
-routes.get('/', root.fetchAllManagers);
-routes.get('/:_id', root.fetchManager);
-routes.get('/:searchquery', root.findSpecificManager);
-routes.get('/:searchquery', root.findManagers);
+routes.post('/', root.registerManager); // works
+routes.get('/', root.fetchAllManagers); // works
+routes.post('/login', root.login); // works 150%
+
+routes.get('/select', root.findSpecificManager); // works
+routes.get('/search', root.findManagers); // works
+routes.get('/:_id', root.fetchManager); // works
 
 
 module.exports = routes;
