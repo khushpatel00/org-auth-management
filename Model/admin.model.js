@@ -26,6 +26,11 @@ const adminschema = mongoose.Schema({
         required: false,
         default: 6, // 6 = read-write, 7 = rw-execute
     },
+    isDeleted: {
+        type: Boolean,
+        required: true,
+        default: false,
+    }
 }, {
     timestamps: true,
     strict: true,

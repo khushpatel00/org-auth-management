@@ -20,6 +20,11 @@ const managerschema = mongoose.Schema({
     avatar: {
         type: String,
         required: false
+    },
+    isDeleted: {
+        type: Boolean,
+        required: true,
+        default: false,
     }
 })
 

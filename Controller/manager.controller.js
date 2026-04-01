@@ -24,8 +24,7 @@ exports.registerManager = async (req, res) => {
                 data.displayName ? '' : data.displayName = data.username;
                 data.password = await bcrypt.hash(data.password, 5);
                 data.role = 5;
-                let response = await managerModel.create(data);
-                delete response.password;
+                let response = await managerModel.create(data).select('-password -isDeleted -__v');
                 if (!req.body.login) return res.status(201).json(response);
                 if (response._id) {
                     let token = jwt.sign({
@@ -51,7 +50,7 @@ exports.registerManager = async (req, res) => {
 }
 exports.fetchAllManagers = async (req, res) => {
     try {
-        let managers = await managerModel.find()
+        let managers = await managerModel.find({ isDeleted: false }).select('-isDeleted -__v');
         return res.json(managers)
     } catch (err) {
         console.log(err);
@@ -60,7 +59,8 @@ exports.fetchAllManagers = async (req, res) => {
 }
 exports.fetchManager = async (req, res) => {
     try {
-        let manager = await managerModel.findById(req.params._id);
+        let manager = await managerModel.findById(req.params._id).select('-__v');
+        if (isDeleted === true) return res.status(404).json('manager not found');
         return res.status(200).json(manager)
     } catch (err) {
         console.log(err);
@@ -72,11 +72,12 @@ exports.findSpecificManager = async (req, res) => {
         let searchQuery = req.query.query;
         let manager = await managerModel.findOne({
             $or: [
+                { isDeleted: false },
                 { username: { $regex: searchQuery, $options: 'i' } },
                 { email: { $regex: searchQuery, $options: 'i' } },
                 { displayName: { $regex: searchQuery, $options: 'i' } },
             ]
-        });
+        }).select('-isDeleted -__v');
         return res.status(200).json(manager);
 
 
@@ -90,11 +91,12 @@ exports.findManagers = async (req, res) => {
         let searchQuery = req.query.query
         let response = await managerModel.find({
             $or: [
+                { isDeleted: false },
                 { username: { $regex: searchQuery, $options: 'i' } },
                 { email: { $regex: searchQuery, $options: 'i' } },
                 { displayName: { $regex: searchQuery, $options: 'i' } },
             ]
-        });
+        }).select('-isDeleted -__v');
         console.log(response);
         return res.json(response);
     } catch (err) {
@@ -106,8 +108,8 @@ exports.login = async (req, res) => {
     try {
         if ((req?.body?.username || req?.body?.email) && req?.body?.password) {
             let manager = null
-            if (req.body.username) manager = await managerModel.findOne({ username: req.body.username });
-            else manager = await managerModel.findOne({ email: req.body.email })
+            if (req.body.username) manager = await managerModel.findOne({ username: req.body.username, isDeleted: false }).select('-isDeleted -__v');
+            else manager = await managerModel.findOne({ email: req.body.email, isDeleted: false }).select('-isDeleted -__v')
             if (!manager) return res.status(401).json('Invalid Credentials');
 
             let data = req.body;
@@ -130,6 +132,27 @@ exports.login = async (req, res) => {
         return res.status(401).json('Bad Request');
     } catch (error) {
         console.log(error)
+        return res.status(500).json('Internal Server Error');
+    }
+}
+exports.deleteManager = async (req, res) => {
+    try {
+        let manager = null;
+        let authHeader = req.header.authorization;
+        if (authHeader && authHeader.startsWith('Bearer '))
+            token = authHeader.split(' ')[1]
+        else return res.status(401).json('Token Required');
+
+        let tokenData = jwt.verify(token, process.env.JWT_SECRET);
+        if (tokenData) manager = await managerModel.findById(tokenData._id).select('-isDeleted -__v');
+        if (!manager) return res.json('Invalid Token');
+        if (manager.isDeleted === true) return res.status(404).json('manager not found');
+
+        let response = await managerModel.findByIdAndUpdate({ isDeleted: true })
+        return res.status(200).json('Manager Deleted Successfully')
+
+    } catch (error) {
+        console.log(error);
         return res.status(500).json('Internal Server Error');
     }
 }

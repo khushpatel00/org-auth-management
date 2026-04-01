@@ -12,6 +12,7 @@ routes.post('/login', root.login)
 routes.get('/select', root.findSpecificEmployee);
 routes.get('/search', root.findEmployees);
 routes.get('/:_id', root.fetchEmployee);
+routes.delete('/:_id', root.deleteEmployee);
 
 
 module.exports = routes;

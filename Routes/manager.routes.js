@@ -11,6 +11,7 @@ routes.post('/login', root.login); // works 150%
 routes.get('/select', root.findSpecificManager); // works
 routes.get('/search', root.findManagers); // works
 routes.get('/:_id', root.fetchManager); // works
+routes.delete('/:_id', root.deleteManager);
 
 
 module.exports = routes;
